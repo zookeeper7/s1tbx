@@ -244,6 +244,7 @@ public class Kompsat5Calibrator extends BaseCalibrator implements Calibrator {
      * @param v                   The pixel value.
      * @param slantRange          The slant range (in m).
      * @param satelliteHeight     The distance from satellite to earth centre (in m).
+     *
      * @param sceneToEarthCentre  The distance from the backscattering element position to earth centre (in m).
      * @param localIncidenceAngle The local incidence angle (in degrees).
      * @param bandPolar           The source band polarization index.
@@ -345,7 +346,8 @@ public class Kompsat5Calibrator extends BaseCalibrator implements Calibrator {
                 final int srcIdx = srcIndex.getIndex(x);
                 final int tgtIdx = tgtIndex.getIndex(x);
 
-                final double dn2Mean = getMeanDN2(x, y, srcData1, srcData2, gimBandData, srcIndex, srcBandUnit, noDataValue);
+                final double dn2Mean = getDN2(x, y, srcData1, srcData2, gimBandData, srcIndex, srcBandUnit, noDataValue);
+                        // getMeanDN2(x, y, srcData1, srcData2, gimBandData, srcIndex, srcBandUnit, noDataValue);
                 if(noDataValue.equals(dn2Mean)) {
                     tgtData.setElemDoubleAt(tgtIdx, noDataValue);
                     continue;
@@ -391,6 +393,30 @@ public class Kompsat5Calibrator extends BaseCalibrator implements Calibrator {
         final int sw = Math.min(x0 + w + halfSizeX, sourceImageWidth) - sx0;
         final int sh = Math.min(y0 + h + halfSizeY, sourceImageHeight) - sy0;
         return new Rectangle(sx0, sy0, sw, sh);
+    }
+
+    private double getDN2(final int x, final int y, final ProductData srcData1, ProductData srcData2,
+                          final ProductData gimBandData, final TileIndex srcIndex, final Unit.UnitType srcBandUnit,
+                          final double noDataValue) {
+        final int srcIdx = srcIndex.getIndex(x);
+        double dn = 0.0, dn2 =0.0, i =0.0, q =0.0;
+
+        if (srcBandUnit == Unit.UnitType.AMPLITUDE) {
+            dn = srcData1.getElemDoubleAt(srcIdx);
+            dn2 = dn * dn;
+        } else if (srcBandUnit == Unit.UnitType.INTENSITY) {
+            dn2 = srcData1.getElemDoubleAt(srcIdx);
+        } else if (srcBandUnit == Unit.UnitType.REAL) {
+            i = srcData1.getElemDoubleAt(srcIdx);
+            q = srcData2.getElemDoubleAt(srcIdx);
+            dn2 = i * i + q * q;
+        } else if (srcBandUnit == Unit.UnitType.INTENSITY_DB) {
+            dn2 = FastMath.pow(10, srcData1.getElemDoubleAt(srcIdx) / 10.0);
+        }
+        final double incidenceAngle = getIncidenceAngle(x,y, gimBandData, srcIdx)* Constants.DTOR;
+
+        dn2 = dn2 * Math.sin(incidenceAngle);
+        return dn2;
     }
 
     private double getMeanDN2(final int x, final int y, final ProductData srcData1, ProductData srcData2,
