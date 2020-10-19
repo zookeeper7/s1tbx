@@ -105,14 +105,21 @@ public class CreateStackOp extends Operator {
             label = "Output Extents")
     private String extent = MASTER_EXTENT;
 
+    @Parameter(description = "Custom offset in X axis", interval = "(*, *)", defaultValue = "0", label = "Custom Offset X")
+    private int customOffsetX = 0;
+
+    @Parameter(description = "Custom offset in Y axis", interval = "(*, *)", defaultValue = "0", label = "Custom Offset Y")
+    private int customOffsetY = 0;
+
     public final static String MASTER_EXTENT = "Master";
     public final static String MIN_EXTENT = "Minimum";
     public final static String MAX_EXTENT = "Maximum";
 
     public final static String INITIAL_OFFSET_GEOLOCATION = "Product Geolocation";
     public final static String INITIAL_OFFSET_ORBIT = "Orbit";
+    public final static String INITIAL_OFFSET_CUSTOMOFFSET = "Custom Offset";
 
-    @Parameter(valueSet = {INITIAL_OFFSET_ORBIT, INITIAL_OFFSET_GEOLOCATION},
+    @Parameter(valueSet = {INITIAL_OFFSET_ORBIT, INITIAL_OFFSET_GEOLOCATION, INITIAL_OFFSET_CUSTOMOFFSET},
             defaultValue = INITIAL_OFFSET_ORBIT,
             description = "Method for computing initial offset between master and slave",
             label = "Initial Offset Method")
@@ -334,6 +341,9 @@ public class CreateStackOp extends Operator {
                 }
                 if (initialOffsetMethod.equals(INITIAL_OFFSET_ORBIT)) {
                     computeTargetSlaveCoordinateOffsets_Orbits();
+                }
+                if (initialOffsetMethod.equals(INITIAL_OFFSET_CUSTOMOFFSET)) {
+                    computeTargetSlaveCoordinateOffsets_Custom();
                 }
             }
 
@@ -835,6 +845,17 @@ public class CreateStackOp extends Operator {
             }
         } catch (Exception e) {
             throw new IOException("Orbit offset method is not support for this product: "+e.getMessage());
+        }
+    }
+
+    private void computeTargetSlaveCoordinateOffsets_Custom() {
+
+        for (final Product slvProd : sourceProduct) {
+            if (slvProd == masterProduct && extent.equals(MASTER_EXTENT)) {
+                slaveOffsetMap.put(slvProd, new int[]{0, 0});
+                continue;
+            }
+            addOffset(slvProd, customOffsetX, customOffsetY);
         }
     }
 

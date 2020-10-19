@@ -35,6 +35,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -55,7 +57,15 @@ public class CreateStackOpUI extends BaseOperatorUI {
     private final JComboBox resamplingType = new JComboBox(ResamplingFactory.resamplingNames);
 
     private final JComboBox initialOffsetMethod = new JComboBox(new String[]{CreateStackOp.INITIAL_OFFSET_ORBIT,
-            CreateStackOp.INITIAL_OFFSET_GEOLOCATION});
+            CreateStackOp.INITIAL_OFFSET_GEOLOCATION,
+            CreateStackOp.INITIAL_OFFSET_CUSTOMOFFSET});
+
+    private final JPanel customOffsetPanel = new JPanel(new GridBagLayout());
+    private final JLabel customOffsetLabel =  new JLabel("Custom Offset");
+    private final JLabel customOffsetXLabel = new JLabel("Offset X:");
+    private final JLabel customOffsetYLabel = new JLabel("Offset Y:");
+    private final JTextField customOffsetX = new JTextField("");
+    private final JTextField customOffsetY = new JTextField("");
 
     private final JComboBox extent = new JComboBox(new String[]{CreateStackOp.MASTER_EXTENT,
             CreateStackOp.MIN_EXTENT,
@@ -92,6 +102,16 @@ public class CreateStackOpUI extends BaseOperatorUI {
 
         initialOffsetMethod.setSelectedItem(paramMap.get("initialOffsetMethod"));
 
+        if (paramMap.get(customOffsetX) == null) {
+            customOffsetX.setText("0");
+        } else {
+            customOffsetX.setText(String.valueOf(paramMap.get("customOffsetX")));
+        }
+        if (paramMap.get(customOffsetY) == null) {
+            customOffsetY.setText("0");
+        } else {
+            customOffsetY.setText(String.valueOf(paramMap.get("customOffsetY")));
+        }
         extent.setSelectedItem(paramMap.get("extent"));
     }
 
@@ -142,6 +162,9 @@ public class CreateStackOpUI extends BaseOperatorUI {
 
         paramMap.put("initialOffsetMethod", initialOffsetMethod.getSelectedItem());
 
+        paramMap.put("customOffsetX", Integer.parseInt(customOffsetX.getText()));
+        paramMap.put("customOffsetY", Integer.parseInt(customOffsetY.getText()));
+
         paramMap.put("extent", extent.getSelectedItem());
     }
 
@@ -173,10 +196,49 @@ public class CreateStackOpUI extends BaseOperatorUI {
         gbc.gridy++;
         DialogUtils.addComponent(contentPane, gbc, "Resampling Type:", resamplingType);
         gbc.gridy++;
+
+
         DialogUtils.addComponent(contentPane, gbc, "Initial Offset Method:", initialOffsetMethod);
         gbc.gridy++;
+
+
+        final GridBagConstraints gbc2 = DialogUtils.createGridBagConstraints();
+        customOffsetPanel.setBorder(BorderFactory.createTitledBorder("Custom Offset"));
+
+        gbc2.gridx = 0;
+        customOffsetPanel.add(customOffsetXLabel, gbc2);
+        gbc2.gridx = 1;
+        gbc2.weightx = 0.5;
+        gbc2.fill = GridBagConstraints.HORIZONTAL;
+        customOffsetPanel.add(customOffsetX, gbc2);
+
+        gbc2.gridy++;
+        gbc2.gridx= 0;
+        customOffsetPanel.add(customOffsetYLabel, gbc2);
+        gbc2.gridx = 1;
+        gbc2.weightx = 0.5;
+        gbc2.fill = GridBagConstraints.HORIZONTAL;
+        customOffsetPanel.add(customOffsetY, gbc2);
+
+        contentPane.add(customOffsetPanel, gbc);
+        gbc.gridy++;
+
         DialogUtils.addComponent(contentPane, gbc, "Output Extents:", extent);
         gbc.gridy++;
+
+        enableCustomOffsetPanel(false);
+
+        initialOffsetMethod.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                final String item = (String) initialOffsetMethod.getSelectedItem();
+                if (item.equals(CreateStackOp.INITIAL_OFFSET_CUSTOMOFFSET)) {
+                    enableCustomOffsetPanel(true);
+                } else {
+                    enableCustomOffsetPanel(false);
+                }
+            }
+        });
 
         optimalMasterButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -194,6 +256,7 @@ public class CreateStackOpUI extends BaseOperatorUI {
         gbc.fill = GridBagConstraints.VERTICAL;
         contentPane.add(optimalMasterButton, gbc);
         gbc.gridy++;
+
 
         DialogUtils.fillPanel(contentPane, gbc);
 
@@ -282,4 +345,8 @@ public class CreateStackOpUI extends BaseOperatorUI {
         return bandNames.toArray(new String[bandNames.size()]);
     }
 
+    private void enableCustomOffsetPanel(boolean flag) {
+        DialogUtils.enableComponents(customOffsetLabel, customOffsetPanel, flag);
+
+    }
 }
