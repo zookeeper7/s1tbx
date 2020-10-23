@@ -58,7 +58,7 @@ public class CreateStackOpUI extends BaseOperatorUI {
 
     private final JComboBox initialOffsetMethod = new JComboBox(new String[]{CreateStackOp.INITIAL_OFFSET_ORBIT,
             CreateStackOp.INITIAL_OFFSET_GEOLOCATION,
-            CreateStackOp.INITIAL_OFFSET_CUSTOMOFFSET});
+            CreateStackOp.INITIAL_OFFSET_CUSTOM});
 
     private final JPanel customOffsetPanel = new JPanel(new GridBagLayout());
     private final JLabel customOffsetLabel =  new JLabel("Custom Offset");
@@ -157,6 +157,10 @@ public class CreateStackOpUI extends BaseOperatorUI {
 
         //OperatorUIUtils.updateParamList(mstBandList, paramMap, "masterBandNames");
         //OperatorUIUtils.updateParamList(slvBandList, paramMap, "slaveBandNames");
+        System.out.println("UpdateParameters");
+        System.out.println(resamplingType.getSelectedItem());
+        System.out.println(initialOffsetMethod.getSelectedItem());
+        System.out.println(extent.getSelectedItem());
 
         paramMap.put("resamplingType", resamplingType.getSelectedItem());
 
@@ -232,7 +236,7 @@ public class CreateStackOpUI extends BaseOperatorUI {
             @Override
             public void itemStateChanged(ItemEvent e) {
                 final String item = (String) initialOffsetMethod.getSelectedItem();
-                if (item.equals(CreateStackOp.INITIAL_OFFSET_CUSTOMOFFSET)) {
+                if (item.equals(CreateStackOp.INITIAL_OFFSET_CUSTOM)) {
                     enableCustomOffsetPanel(true);
                 } else {
                     enableCustomOffsetPanel(false);

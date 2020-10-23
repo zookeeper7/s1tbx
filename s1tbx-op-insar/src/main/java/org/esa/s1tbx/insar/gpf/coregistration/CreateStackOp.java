@@ -117,13 +117,13 @@ public class CreateStackOp extends Operator {
 
     public final static String INITIAL_OFFSET_GEOLOCATION = "Product Geolocation";
     public final static String INITIAL_OFFSET_ORBIT = "Orbit";
-    public final static String INITIAL_OFFSET_CUSTOMOFFSET = "Custom Offset";
+    public final static String INITIAL_OFFSET_CUSTOM = "Custom Offset";
 
-    @Parameter(valueSet = {INITIAL_OFFSET_ORBIT, INITIAL_OFFSET_GEOLOCATION, INITIAL_OFFSET_CUSTOMOFFSET},
-            defaultValue = INITIAL_OFFSET_ORBIT,
+    @Parameter(valueSet = {INITIAL_OFFSET_ORBIT, INITIAL_OFFSET_GEOLOCATION, INITIAL_OFFSET_CUSTOM},
+            defaultValue = INITIAL_OFFSET_CUSTOM,
             description = "Method for computing initial offset between master and slave",
             label = "Initial Offset Method")
-    private String initialOffsetMethod = INITIAL_OFFSET_ORBIT;
+    private String initialOffsetMethod = INITIAL_OFFSET_CUSTOM;
 
     private final Map<Band, Band> sourceRasterMap = new HashMap<>(10);
     private final Map<Product, int[]> slaveOffsetMap = new HashMap<>(10);
@@ -334,7 +334,7 @@ public class CreateStackOp extends Operator {
                 }
             } else {
                 if(initialOffsetMethod == null) {
-                    initialOffsetMethod = INITIAL_OFFSET_ORBIT;
+                    initialOffsetMethod = INITIAL_OFFSET_CUSTOM;
                 }
                 if (initialOffsetMethod.equals(INITIAL_OFFSET_GEOLOCATION)) {
                     computeTargetSlaveCoordinateOffsets_GCP();
@@ -342,7 +342,7 @@ public class CreateStackOp extends Operator {
                 if (initialOffsetMethod.equals(INITIAL_OFFSET_ORBIT)) {
                     computeTargetSlaveCoordinateOffsets_Orbits();
                 }
-                if (initialOffsetMethod.equals(INITIAL_OFFSET_CUSTOMOFFSET)) {
+                if (initialOffsetMethod.equals(INITIAL_OFFSET_CUSTOM)) {
                     computeTargetSlaveCoordinateOffsets_Custom();
                 }
             }
