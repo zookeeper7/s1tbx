@@ -102,12 +102,12 @@ public class CreateStackOpUI extends BaseOperatorUI {
 
         initialOffsetMethod.setSelectedItem(paramMap.get("initialOffsetMethod"));
 
-        if (paramMap.get(customOffsetX) == null) {
+        if (paramMap.get("customOffsetX") == null) {
             customOffsetX.setText("0");
         } else {
             customOffsetX.setText(String.valueOf(paramMap.get("customOffsetX")));
         }
-        if (paramMap.get(customOffsetY) == null) {
+        if (paramMap.get("customOffsetY") == null) {
             customOffsetY.setText("0");
         } else {
             customOffsetY.setText(String.valueOf(paramMap.get("customOffsetY")));
